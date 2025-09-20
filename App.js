@@ -1,20 +1,44 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import Home from './src/screens/Home';
+import Browse from './src/screens/Browse';
+import Orders from './src/screens/Orders';
+import Login from './src/screens/Login';
+import { AuthProvider, useAuth } from './src/context/AuthContext';
 
-export default function App() {
+const Stack = createNativeStackNavigator();
+
+function AuthedStack() {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <Stack.Navigator>
+      <Stack.Screen name="Home" component={Home} />
+      <Stack.Screen name="Browse" component={Browse} />
+      <Stack.Screen name="Orders" component={Orders} />
+    </Stack.Navigator>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+function UnauthedStack() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen name="Login" component={Login} options={{ headerShown: false }} />
+    </Stack.Navigator>
+  );
+}
+
+function RootNavigator() {
+  const { isAuthed, loading } = useAuth();
+  if (loading) return null; // could render splash
+  return isAuthed ? <AuthedStack /> : <UnauthedStack />;
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <NavigationContainer>
+        <RootNavigator />
+      </NavigationContainer>
+    </AuthProvider>
+  );
+}

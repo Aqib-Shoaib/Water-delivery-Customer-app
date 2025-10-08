@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Text, FlatList, ActivityIndicator, StyleSheet, TouchableOpacity } from 'react-native';
 import { useAuth } from '../context/AuthContext';
+import { useNavigation } from '@react-navigation/native';
 
 const API_BASE = process.env.EXPO_PUBLIC_API_BASE || 'http://localhost:5000';
 
@@ -9,6 +10,7 @@ export default function Orders() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [orders, setOrders] = useState([]);
+  const navigation = useNavigation();
 
   useEffect(() => {
     let cancelled = false;
@@ -39,11 +41,13 @@ export default function Orders() {
         data={orders}
         keyExtractor={(item) => item._id}
         renderItem={({ item }) => (
-          <View style={styles.card}>
-            <Text style={styles.title}>Order #{item._id.slice(-6)}</Text>
-            <Text>Status: {item.status}</Text>
-            <Text>Total: ${item.totalAmount}</Text>
-          </View>
+          <TouchableOpacity onPress={() => navigation.navigate('OrderDetails', { order: item })}>
+            <View style={styles.card}>
+              <Text style={styles.title}>Order #{item._id.slice(-6)}</Text>
+              <Text>Status: {item.status}</Text>
+              <Text>Total: ${item.totalAmount}</Text>
+            </View>
+          </TouchableOpacity>
         )}
         ListEmptyComponent={<Text>No orders yet</Text>}
       />

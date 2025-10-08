@@ -21,10 +21,11 @@ const styles = StyleSheet.create({
   },
   text: { fontSize: 14, fontWeight: '600' },
   pressed: { opacity: 0.85 },
-  primary: { backgroundColor: '#2563eb' },
+  primary: { backgroundColor: '#dc2626' },
   primaryText: { color: 'white' },
   secondary: { backgroundColor: '#e5e7eb' },
   secondaryText: { color: '#111827' },
   outline: { borderWidth: 1, borderColor: '#d1d5db', backgroundColor: 'white' },
   outlineText: { color: '#111827' },
 });
+

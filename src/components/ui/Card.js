@@ -1,16 +1,30 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
+import { useTheme } from '@react-navigation/native';
 
 export default function Card({ children, style }) {
-  return <View style={[styles.card, style]}>{children}</View>;
+  const { colors, dark } = useTheme();
+  return (
+    <View
+      style={[
+        styles.card,
+        {
+          backgroundColor: colors.card,
+          borderColor: dark ? '#374151' : '#e5e7eb',
+          shadowOpacity: dark ? 0.1 : 0.05,
+        },
+        style,
+      ]}
+    >
+      {children}
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: 'white',
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#e5e7eb',
     padding: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },

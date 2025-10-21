@@ -116,6 +116,24 @@ export function AuthProvider({ children }) {
     return data.user;
   };
 
+  // Change password with current and new password
+  const changePassword = async ({ currentPassword, newPassword }) => {
+    if (!token) throw new Error('Not authenticated');
+    const res = await fetch(`${API_BASE}/api/auth/change-password`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ currentPassword, newPassword }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || 'Failed to change password');
+    }
+    return res.json();
+  };
+
   const logout = async () => {
     setToken(null);
     setUser(null);
@@ -133,6 +151,7 @@ export function AuthProvider({ children }) {
       confirmPasswordReset,
       fetchMe,
       updateMe,
+      changePassword,
       logout,
       loading,
       isAuthed: !!token,

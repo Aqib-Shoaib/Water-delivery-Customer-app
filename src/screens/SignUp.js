@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { useTheme } from '@react-navigation/native';
 import Button from '../components/ui/Button';
 import { useAuth } from '../context/AuthContext';
 import { useNavigation } from '@react-navigation/native';
+import Input from '../components/ui/Input';
 
 export default function SignUp() {
   const { register } = useAuth();
   const navigation = useNavigation();
+  const { colors, dark } = useTheme();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -69,26 +72,53 @@ export default function SignUp() {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.card}>
-        <Text style={styles.title}>Create Account</Text>
-        <TextInput placeholder="Full Name" value={name} onChangeText={setName} style={[styles.input, fieldErrors.name && styles.inputError]} />
-        {fieldErrors.name ? <Text style={styles.error}>{fieldErrors.name}</Text> : null}
-        <TextInput placeholder="Email" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" style={[styles.input, fieldErrors.email && styles.inputError]} />
-        {fieldErrors.email ? <Text style={styles.error}>{fieldErrors.email}</Text> : null}
-        <TextInput placeholder="Password" value={password} onChangeText={setPassword} secureTextEntry style={[styles.input, fieldErrors.password && styles.inputError]} />
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={[styles.card, { backgroundColor: colors.card, borderColor: dark ? '#374151' : '#e5e7eb' }]}>
+        <Text style={[styles.title, { color: colors.text }]}>Create Account</Text>
+        <Input
+          label="Full Name"
+          placeholder="Enter your full name"
+          value={name}
+          onChangeText={setName}
+          error={fieldErrors.name}
+        />
+        <Input
+          label="Email"
+          placeholder="Enter your email"
+          value={email}
+          onChangeText={setEmail}
+          autoCapitalize="none"
+          keyboardType="email-address"
+          error={fieldErrors.email}
+          style={{ marginTop: 12 }}
+        />
+        <Input
+          label="Password"
+          placeholder="Create a password"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+          secureToggle
+          style={{ marginTop: 12 }}
+        />
         {password ? (
           <View style={styles.strengthRow}>
             <View style={[styles.strengthBar, { backgroundColor: passwordStrength(password).color, width: `${passwordStrength(password).score * 33.33}%` }]} />
             <Text style={[styles.strengthText, { color: passwordStrength(password).color }]}>{passwordStrength(password).label}</Text>
           </View>
         ) : null}
-        {fieldErrors.password ? <Text style={styles.error}>{fieldErrors.password}</Text> : null}
-        <TextInput placeholder="CNIC (optional)" value={cnic} onChangeText={onCnicChange} keyboardType="number-pad" style={[styles.input, fieldErrors.cnic && styles.inputError]} />
-        {fieldErrors.cnic ? <Text style={styles.error}>{fieldErrors.cnic}</Text> : null}
+        <Input
+          label="CNIC (optional)"
+          placeholder="12345-1234567-1"
+          value={cnic}
+          onChangeText={onCnicChange}
+          keyboardType="number-pad"
+          error={fieldErrors.cnic}
+          style={{ marginTop: 12 }}
+        />
         {error ? <Text style={styles.error}>{error}</Text> : null}
-        <Button title={loading ? 'Creating...' : 'Sign Up'} onPress={onSubmit} disabled={loading} style={{ marginTop: 8 }} />
-        <TouchableOpacity onPress={() => navigation.navigate('Login')} style={{ marginTop: 12, alignItems: 'center' }}>
+        <Button title={loading ? 'Creating...' : 'Sign Up'} onPress={onSubmit} disabled={loading} style={{ marginTop: 12 }} />
+        <TouchableOpacity onPress={() => navigation.navigate('Login')} style={{ marginTop: 16, alignItems: 'center' }}>
           <Text style={{ color: '#dc2626' }}>Already have an account? Sign in</Text>
         </TouchableOpacity>
       </View>
@@ -97,10 +127,9 @@ export default function SignUp() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#f9fafb', padding: 16 },
-  card: { width: '100%', maxWidth: 400, backgroundColor: 'white', borderRadius: 12, borderWidth: 1, borderColor: '#e5e7eb', padding: 16 },
+  container: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 16 },
+  card: { width: '100%', maxWidth: 400, borderRadius: 12, borderWidth: 1, padding: 16 },
   title: { fontSize: 18, fontWeight: '700', marginBottom: 12 },
-  input: { borderWidth: 1, borderColor: '#d1d5db', borderRadius: 8, paddingHorizontal: 12, paddingVertical: 10, marginTop: 8 },
   inputError: { borderColor: '#ef4444' },
   error: { color: '#ef4444', marginTop: 8 },
   strengthRow: { marginTop: 6, marginBottom: 2 },

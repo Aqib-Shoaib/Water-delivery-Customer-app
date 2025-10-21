@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
+import { useTheme } from '@react-navigation/native';
 import Button from '../components/ui/Button';
+import Input from '../components/ui/Input';
+import Card from '../components/ui/Card';
 import { useAuth } from '../context/AuthContext';
 import { useNavigation } from '@react-navigation/native';
 
 export default function Otp() {
   const { confirmPasswordReset } = useAuth();
   const navigation = useNavigation();
+  const { colors } = useTheme();
   const [token, setToken] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -29,24 +33,37 @@ export default function Otp() {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.card}>
-        <Text style={styles.title}>Enter Reset Token</Text>
-        <TextInput placeholder="Token" value={token} onChangeText={setToken} autoCapitalize="none" style={styles.input} />
-        <TextInput placeholder="New Password" value={password} onChangeText={setPassword} secureTextEntry style={styles.input} />
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <Card style={styles.cardPad}>
+        <Text style={[styles.title, { color: colors.text }]}>Enter Reset Token</Text>
+        <Input
+          label="Token"
+          placeholder="Paste reset token"
+          value={token}
+          onChangeText={setToken}
+          autoCapitalize="none"
+        />
+        <Input
+          label="New Password"
+          placeholder="Enter new password"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+          secureToggle
+          style={{ marginTop: 12 }}
+        />
         {error ? <Text style={styles.error}>{error}</Text> : null}
         {info ? <Text style={styles.info}>{info}</Text> : null}
-        <Button title={loading ? 'Submitting...' : 'Confirm Reset'} onPress={onSubmit} disabled={loading} style={{ marginTop: 8 }} />
-      </View>
+        <Button title={loading ? 'Submitting...' : 'Confirm Reset'} onPress={onSubmit} disabled={loading} style={{ marginTop: 12 }} />
+      </Card>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#f9fafb', padding: 16 },
-  card: { width: '100%', maxWidth: 400, backgroundColor: 'white', borderRadius: 12, borderWidth: 1, borderColor: '#e5e7eb', padding: 16 },
+  container: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 16 },
+  cardPad: { width: '100%', maxWidth: 400, padding: 16 },
   title: { fontSize: 18, fontWeight: '700', marginBottom: 12 },
-  input: { borderWidth: 1, borderColor: '#d1d5db', borderRadius: 8, paddingHorizontal: 12, paddingVertical: 10, marginTop: 8 },
   error: { color: '#ef4444', marginTop: 8 },
   info: { color: '#065f46', marginTop: 8 },
 });

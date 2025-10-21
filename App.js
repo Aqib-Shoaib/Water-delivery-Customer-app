@@ -1,9 +1,7 @@
-import React from 'react';
-import { View, ActivityIndicator, Text } from 'react-native';
-import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
+import { View, ActivityIndicator, Text, TouchableOpacity } from 'react-native';
+import { NavigationContainer, useTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import Home from './src/screens/Home';
 import Browse from './src/screens/Browse';
 import Orders from './src/screens/Orders';
 import Login from './src/screens/Login';
@@ -14,21 +12,31 @@ import { AuthProvider, useAuth } from './src/context/AuthContext';
 import { CartProvider } from './src/context/CartContext';
 import Cart from './src/screens/Cart';
 import Checkout from './src/screens/Checkout';
-import Deals from './src/screens/Deals';
-import About from './src/screens/About';
 import Profile from './src/screens/Profile';
 import OrderDetails from './src/screens/OrderDetails';
 import Support from './src/screens/Support';
+import { ThemeProvider, useThemeContext } from './src/context/ThemeContext';
+import Ionicons from '@expo/vector-icons/Ionicons';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
+
+function ToggleThemeButton() {
+  const { mode, toggle } = useThemeContext();
+  const { colors, dark } = useTheme();
+  return (
+    <TouchableOpacity onPress={toggle} style={{ paddingHorizontal: 12 }}>
+      <Ionicons name={mode === 'dark' ? 'sunny' : 'moon'} size={22} color={colors.primary} />
+    </TouchableOpacity>
+  );
+}
 
 function AuthedStack() {
   return (
     <Stack.Navigator
       screenOptions={{
-        headerStyle: { backgroundColor: '#ffffff' },
         headerTintColor: '#dc2626',
+        headerRight: () => <ToggleThemeButton />,
       }}
     >
       <Stack.Screen name="Main" component={MainTabs} options={{ headerShown: false }} />
@@ -43,9 +51,9 @@ function MainTabs() {
   return (
     <Tab.Navigator
       screenOptions={{
-        headerStyle: { backgroundColor: '#ffffff' },
         headerTintColor: '#dc2626',
         tabBarActiveTintColor: '#dc2626',
+        headerRight: () => <ToggleThemeButton />,
       }}
     >
       <Tab.Screen name="Browse" component={Browse} />
@@ -61,11 +69,11 @@ function UnauthedStack() {
   return (
     <Stack.Navigator
       screenOptions={{
-        headerStyle: { backgroundColor: '#ffffff' },
         headerTintColor: '#dc2626',
+        headerRight: () => <ToggleThemeButton />,
       }}
     >
-      <Stack.Screen name="Login" component={Login} options={{ headerShown: false }} />
+      <Stack.Screen name="Login" component={Login} options={{ title: 'Login', headerShown: true }} />
       <Stack.Screen name="SignUp" component={SignUp} options={{ title: 'Create Account' }} />
       <Stack.Screen name="ForgotPassword" component={ForgotPassword} options={{ title: 'Forgot Password' }} />
       <Stack.Screen name="Otp" component={Otp} options={{ title: 'Reset Password' }} />
@@ -73,20 +81,7 @@ function UnauthedStack() {
   );
 }
 
-const RedTheme = {
-  ...DefaultTheme,
-  colors: {
-    ...DefaultTheme.colors,
-    primary: '#dc2626',
-    background: DefaultTheme.colors.background,
-    card: DefaultTheme.colors.card,
-    text: DefaultTheme.colors.text,
-    border: DefaultTheme.colors.border,
-    notification: '#dc2626',
-  },
-};
-
-export default function App() {
+function RootNavigator() {
   const { isAuthed, loading } = useAuth();
   if (loading) {
     return (
@@ -100,26 +95,22 @@ export default function App() {
 }
 
 export default function App() {
-  const RedTheme = {
-    ...DefaultTheme,
-    colors: {
-      ...DefaultTheme.colors,
-      primary: '#dc2626',
-      background: DefaultTheme.colors.background,
-      card: DefaultTheme.colors.card,
-      text: DefaultTheme.colors.text,
-      border: DefaultTheme.colors.border,
-      notification: '#dc2626',
-    },
+  const ThemedContainer = () => {
+    const { theme } = useThemeContext();
+    return (
+      <NavigationContainer theme={theme}>
+        <RootNavigator />
+      </NavigationContainer>
+    );
   };
   return (
-    <AuthProvider>
-      <CartProvider>
-        <NavigationContainer theme={RedTheme}>
-          <RootNavigator />
-        </NavigationContainer>
-      </CartProvider>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <CartProvider>
+          <ThemedContainer />
+        </CartProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 

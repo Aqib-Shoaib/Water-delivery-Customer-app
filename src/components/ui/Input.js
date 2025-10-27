@@ -1,9 +1,9 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { TextInput, Text, View, StyleSheet, Pressable } from 'react-native';
 import { useTheme } from '@react-navigation/native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
-export default function Input({
+function InputComponent({
   label,
   error,
   style,
@@ -25,9 +25,9 @@ export default function Input({
 
   return (
     <View style={style}>
-      {label ? (
+      {label &&
         <Text style={[styles.label, { color: dark ? '#d1d5db' : '#374151' }]}>{label}</Text>
-      ) : null}
+      }
       <View
         style={[
           styles.inputWrapper,
@@ -39,19 +39,19 @@ export default function Input({
           isFocused && styles.focusShadow,
         ]}
       >
-        {leftIcon ? <View style={styles.iconLeft}>{leftIcon}</View> : null}
+        {leftIcon && <View style={styles.iconLeft}>{leftIcon}</View>}
         <TextInput
           style={[styles.input, { color: colors.text }]}
           placeholderTextColor={dark ? '#9ca3af' : '#6b7280'}
           secureTextEntry={isSecure}
-          onFocus={(e) => {
-            setIsFocused(true);
-            props.onFocus?.(e);
-          }}
-          onBlur={(e) => {
-            setIsFocused(false);
-            props.onBlur?.(e);
-          }}
+          // onFocus={(e) => {
+          //   setIsFocused(true);
+          //   props.onFocus?.(e);
+          // }}
+          // onBlur={(e) => {
+          //   setIsFocused(false);
+          //   props.onBlur?.(e);
+          // }}
           {...props}
         />
         {secureToggle ? (
@@ -66,6 +66,8 @@ export default function Input({
     </View>
   );
 }
+
+export default React.memo(InputComponent);
 
 const styles = StyleSheet.create({
   label: { fontSize: 12, marginBottom: 6 },

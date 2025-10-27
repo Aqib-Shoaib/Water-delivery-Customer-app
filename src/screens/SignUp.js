@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useTheme } from '@react-navigation/native';
 import Button from '../components/ui/Button';
@@ -45,9 +45,9 @@ export default function SignUp() {
     return out;
   };
 
-  const onCnicChange = (v) => setCnic(formatCnic(v));
+  const onCnicChange = useCallback((v) => setCnic(formatCnic(v)), []);
 
-  const validate = () => {
+  const validate = useCallback(() => {
     const errs = {};
     if (!nameValid(name)) errs.name = 'Enter your full name';
     if (!emailValid(email)) errs.email = 'Enter a valid email address';
@@ -56,9 +56,9 @@ export default function SignUp() {
     if (cnic && cnic.replace(/\D/g, '').length !== 13) errs.cnic = 'CNIC must have 13 digits';
     setFieldErrors(errs);
     return Object.keys(errs).length === 0;
-  };
+  }, [name, email, password, cnic]);
 
-  const onSubmit = async () => {
+  const onSubmit = useCallback(async () => {
     setLoading(true);
     setError('');
     try {
@@ -69,11 +69,17 @@ export default function SignUp() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [validate, register]);
+
+  const containerStyle = useMemo(() => [styles.container, { backgroundColor: colors.background }], [colors.background]);
+  const cardStyle = useMemo(() => [styles.card, { backgroundColor: colors.card, borderColor: dark ? '#374151' : '#e5e7eb' }], [colors.card, dark]);
+  const emailInputStyle = useMemo(() => ({ marginTop: 12 }), []);
+  const passwordInputStyle = useMemo(() => ({ marginTop: 12 }), []);
+  const cnicInputStyle = useMemo(() => ({ marginTop: 12 }), []);
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={[styles.card, { backgroundColor: colors.card, borderColor: dark ? '#374151' : '#e5e7eb' }]}>
+    <View style={containerStyle}>
+      <View style={cardStyle}>
         <Text style={[styles.title, { color: colors.text }]}>Create Account</Text>
         <Input
           label="Full Name"
@@ -90,7 +96,7 @@ export default function SignUp() {
           autoCapitalize="none"
           keyboardType="email-address"
           error={fieldErrors.email}
-          style={{ marginTop: 12 }}
+          style={emailInputStyle}
         />
         <Input
           label="Password"
@@ -99,7 +105,7 @@ export default function SignUp() {
           onChangeText={setPassword}
           secureTextEntry
           secureToggle
-          style={{ marginTop: 12 }}
+          style={passwordInputStyle}
         />
         {password ? (
           <View style={styles.strengthRow}>
@@ -114,7 +120,7 @@ export default function SignUp() {
           onChangeText={onCnicChange}
           keyboardType="number-pad"
           error={fieldErrors.cnic}
-          style={{ marginTop: 12 }}
+          style={cnicInputStyle}
         />
         {error ? <Text style={styles.error}>{error}</Text> : null}
         <Button title={loading ? 'Creating...' : 'Sign Up'} onPress={onSubmit} disabled={loading} style={{ marginTop: 12 }} />

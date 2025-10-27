@@ -23,7 +23,9 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = async ({ email, password }) => {
-    const res = await fetch(`${API_BASE}/api/auth/login`, {
+    const url = `${API_BASE}/api/auth/login`;
+    console.log(url)
+    const res = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
@@ -38,25 +40,27 @@ export function AuthProvider({ children }) {
 
   // Register a new customer account
   const register = async ({ name, email, password, cnic }) => {
-    const res = await fetch(`${API_BASE}/api/auth/register`, {
+    const url = `${API_BASE}/api/auth/register`;
+    const res = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, email, password, cnic }),
     });
+    const json = await res.json();
+    console.log(json)
     if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.message || 'Registration failed');
+      throw new Error(json.message || 'Registration failed');
     }
-    const data = await res.json();
-    setToken(data.token);
-    setUser(data.user);
-    await AsyncStorage.setItem('token', data.token);
-    await AsyncStorage.setItem('user', JSON.stringify(data.user));
+    setToken(json.token);
+    setUser(json.user);
+    await AsyncStorage.setItem('token', json.token);
+    await AsyncStorage.setItem('user', JSON.stringify(json.user));
   };
 
   // Request a password reset token (OTP-like token)
   const requestPasswordReset = async ({ email }) => {
-    const res = await fetch(`${API_BASE}/api/password-resets/request`, {
+    const url = `${API_BASE}/api/password-resets/request`;
+    const res = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email }),
@@ -70,7 +74,8 @@ export function AuthProvider({ children }) {
 
   // Confirm reset by providing token and the new password
   const confirmPasswordReset = async ({ token, password }) => {
-    const res = await fetch(`${API_BASE}/api/password-resets/confirm`, {
+    const url = `${API_BASE}/api/password-resets/confirm`;
+    const res = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token, password }),
@@ -85,7 +90,8 @@ export function AuthProvider({ children }) {
   // Fetch current user details
   const fetchMe = async () => {
     if (!token) return;
-    const res = await fetch(`${API_BASE}/api/auth/me`, {
+    const url = `${API_BASE}/api/auth/me`;
+    const res = await fetch(url, {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (!res.ok) throw new Error('Failed to load profile');
@@ -98,7 +104,8 @@ export function AuthProvider({ children }) {
   // Update profile fields (name, phone, address)
   const updateMe = async (patch) => {
     if (!token) throw new Error('Not authenticated');
-    const res = await fetch(`${API_BASE}/api/auth/me`, {
+    const url = `${API_BASE}/api/auth/me`;
+    const res = await fetch(url, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -119,7 +126,8 @@ export function AuthProvider({ children }) {
   // Change password with current and new password
   const changePassword = async ({ currentPassword, newPassword }) => {
     if (!token) throw new Error('Not authenticated');
-    const res = await fetch(`${API_BASE}/api/auth/change-password`, {
+    const url = `${API_BASE}/api/auth/change-password`;
+    const res = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

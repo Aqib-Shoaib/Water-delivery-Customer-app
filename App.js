@@ -1,4 +1,5 @@
 import { View, ActivityIndicator, Text, TouchableOpacity } from 'react-native';
+import { useEffect } from 'react';
 import { NavigationContainer, useTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -17,6 +18,7 @@ import OrderDetails from './src/screens/OrderDetails';
 import Support from './src/screens/Support';
 import { ThemeProvider, useThemeContext } from './src/context/ThemeContext';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import * as SplashScreen from 'expo-splash-screen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -83,6 +85,11 @@ function UnauthedStack() {
 
 function RootNavigator() {
   const { isAuthed, loading } = useAuth();
+  useEffect(() => {
+    if (!loading) {
+      SplashScreen.hideAsync().catch(() => {});
+    }
+  }, [loading]);
   if (loading) {
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#ffffff' }}>
@@ -103,6 +110,9 @@ export default function App() {
       </NavigationContainer>
     );
   };
+  useEffect(() => {
+    SplashScreen.preventAutoHideAsync().catch(() => {});
+  }, []);
   return (
     <ThemeProvider>
       <AuthProvider>

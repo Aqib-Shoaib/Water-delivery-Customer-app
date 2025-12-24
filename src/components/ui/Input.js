@@ -1,94 +1,128 @@
-import React, { useMemo, useState, useCallback } from 'react';
-import { TextInput, Text, View, StyleSheet, Pressable } from 'react-native';
+import React, { useState } from 'react';
+import { View, TextInput, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useTheme } from '@react-navigation/native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
-function InputComponent({
+export default function Input({
   label,
-  error,
-  style,
+  value,
+  onChangeText,
+  placeholder,
   secureTextEntry,
-  secureToggle = false,
+  error,
   leftIcon,
   rightIcon,
+  style,
+  keyboardType,
+  autoCapitalize = 'none',
   ...props
 }) {
-  const { colors, dark } = useTheme();
+  const { colors } = useTheme();
   const [isFocused, setIsFocused] = useState(false);
-  const [isSecure, setIsSecure] = useState(!!secureTextEntry);
+  const [showPassword, setShowPassword] = useState(false);
 
-  const borderColor = useMemo(() => {
-    if (error) return '#ef4444';
-    if (isFocused) return '#dc2626';
-    return dark ? '#4b5563' : '#d1d5db';
-  }, [error, isFocused, dark]);
+  const isSecure = secureTextEntry && !showPassword;
+  
+  const borderColor = error
+    ? colors.error
+    : isFocused
+    ? colors.primary
+    : 'transparent';
+
+  const backgroundColor = colors.card;
 
   return (
-    <View style={style}>
-      {label &&
-        <Text style={[styles.label, { color: dark ? '#d1d5db' : '#374151' }]}>{label}</Text>
-      }
+    <View style={[styles.container, style]}>
+      {label && <Text style={[styles.label, { color: colors.textSecondary }]}>{label}</Text>}
+      
       <View
         style={[
-          styles.inputWrapper,
+          styles.inputContainer,
           {
+            backgroundColor,
             borderColor,
-            backgroundColor: dark ? '#111827' : '#ffffff',
-            shadowColor: isFocused ? '#dc2626' : 'transparent',
+            borderWidth: isFocused || error ? 1.5 : 1,
+            shadowColor: isFocused ? colors.primary : '#000',
+            shadowOpacity: isFocused ? 0.15 : 0.05,
           },
-          isFocused && styles.focusShadow,
         ]}
       >
-        {leftIcon && <View style={styles.iconLeft}>{leftIcon}</View>}
+        {leftIcon && (
+          <View style={styles.leftIcon}>
+            <Ionicons name={leftIcon} size={20} color={isFocused ? colors.primary : colors.textSecondary} />
+          </View>
+        )}
+
         <TextInput
-          style={[styles.input, { color: colors.text }]}
-          placeholderTextColor={dark ? '#9ca3af' : '#6b7280'}
+          value={value}
+          onChangeText={onChangeText}
+          placeholder={placeholder}
+          placeholderTextColor={colors.textSecondary + '80'} // 50% opacity
           secureTextEntry={isSecure}
-          // onFocus={(e) => {
-          //   setIsFocused(true);
-          //   props.onFocus?.(e);
-          // }}
-          // onBlur={(e) => {
-          //   setIsFocused(false);
-          //   props.onBlur?.(e);
-          // }}
+          style={[styles.input, { color: colors.text }]}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+          keyboardType={keyboardType}
+          autoCapitalize={autoCapitalize}
           {...props}
         />
-        {secureToggle ? (
-          <Pressable onPress={() => setIsSecure((v) => !v)} style={styles.iconRight}>
-            <Ionicons name={isSecure ? 'eye-off' : 'eye'} size={18} color={dark ? '#9ca3af' : '#6b7280'} />
-          </Pressable>
-        ) : rightIcon ? (
-          <View style={styles.iconRight}>{rightIcon}</View>
-        ) : null}
+
+        {(secureTextEntry || rightIcon) && (
+          <View style={styles.rightIcon}>
+            {secureTextEntry ? (
+              <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                <Ionicons
+                  name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                  size={20}
+                  color={colors.textSecondary}
+                />
+              </TouchableOpacity>
+            ) : (
+              <Ionicons name={rightIcon} size={20} color={colors.textSecondary} />
+            )}
+          </View>
+        )}
       </View>
-      {error ? <Text style={styles.error}>{error}</Text> : null}
+
+      {error ? <Text style={[styles.errorText, { color: colors.error }]}>{error}</Text> : null}
     </View>
   );
 }
 
-export default React.memo(InputComponent);
-
 const styles = StyleSheet.create({
-  label: { fontSize: 12, marginBottom: 6 },
-  inputWrapper: {
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
+  container: {
+    marginBottom: 4,
+  },
+  label: {
+    fontSize: 14,
+    marginBottom: 8,
+    fontWeight: '500',
+    marginLeft: 4,
+  },
+  inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    height: 56,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+    elevation: 2,
   },
   input: {
     flex: 1,
-    fontSize: 14,
+    fontSize: 16,
+    height: '100%',
   },
-  iconLeft: { paddingRight: 8 },
-  iconRight: { paddingLeft: 8 },
-  focusShadow: {
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
+  leftIcon: {
+    marginRight: 12,
   },
-  error: { marginTop: 6, color: '#ef4444', fontSize: 12 },
+  rightIcon: {
+    marginLeft: 12,
+  },
+  errorText: {
+    fontSize: 12,
+    marginTop: 6,
+    marginLeft: 4,
+  },
 });

@@ -1,83 +1,93 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { useTheme } from '@react-navigation/native';
+import { View, Text, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform, SafeAreaView } from 'react-native';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import Card from '../components/ui/Card';
 import { useAuth } from '../context/AuthContext';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useTheme } from '@react-navigation/native';
+import Ionicons from '@expo/vector-icons/Ionicons';
 
 export default function ForgotPassword() {
   const { requestPasswordReset } = useAuth();
   const navigation = useNavigation();
   const { colors } = useTheme();
+  
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [info, setInfo] = useState('');
-  const [devToken, setDevToken] = useState(''); // useful in non-production since API returns token for testing
-  const [fieldError, setFieldError] = useState('');
 
-  const emailValid = (v) => /^(?:[^\s@]+)@(?:[^\s@]+)\.(?:[^\s@]+)$/.test(v.trim());
-
-  const onSubmit = async () => {
+  const  onSubmit = async () => {
+    if (!email) {
+      setError("Please enter your email");
+      return;
+    }
     setLoading(true);
     setError('');
-    setInfo('');
-    setFieldError('');
     try {
-      if (!emailValid(email)) {
-        setFieldError('Enter a valid email address');
-        return;
-      }
-      const res = await requestPasswordReset({ email });
-      setInfo('If an account exists, a reset token has been generated.');
-      if (res?.token) setDevToken(res.token);
+      await requestPasswordReset({ email });
+      navigation.navigate('Otp', { email });
     } catch (e) {
-      setError(e.message || 'Request failed');
+      setError(e.message);
     } finally {
       setLoading(false);
     }
   };
 
-  const goToOtp = () => {
-    navigation.navigate('Otp');
-  };
-
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <Card style={styles.cardPad}>
-        <Text style={[styles.title, { color: colors.text }]}>Forgot Password</Text>
-        <Input
-          label="Email"
-          placeholder="Enter your email"
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-          keyboardType="email-address"
-          error={fieldError}
-        />
-        {error ? <Text style={styles.error}>{error}</Text> : null}
-        {info ? <Text style={[styles.info]}>{info}</Text> : null}
-        {__DEV__ && devToken ? (
-          <View style={{ marginTop: 8 }}>
-            <Text style={{ fontSize: 12, color: '#6b7280' }}>Dev Token (testing):</Text>
-            <Text selectable style={{ fontWeight: '600' }}>{devToken}</Text>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.keyboardView}>
+        <View style={styles.content}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+            <Ionicons name="arrow-back" size={24} color={colors.text} />
+          </TouchableOpacity>
+          
+          <View style={styles.header}>
+            <Text style={[styles.title, { color: colors.text }]}>Forgot Password?</Text>
+            <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+              Don't worry! It happens. Please enter the email associated with your account.
+            </Text>
           </View>
-        ) : null}
-        <Button title={loading ? 'Submitting...' : 'Request Reset'} onPress={onSubmit} disabled={loading} style={{ marginTop: 12 }} />
-        <TouchableOpacity onPress={goToOtp} style={{ marginTop: 16, alignItems: 'center' }}>
-          <Text style={{ color: '#dc2626' }}>Already have a token? Enter it</Text>
-        </TouchableOpacity>
-      </Card>
-    </View>
+
+          <Card variant="glass" style={styles.formCard}>
+            <Input
+              label="Email Address"
+              placeholder="john@example.com"
+              value={email}
+              onChangeText={setEmail}
+              autoCapitalize="none"
+              keyboardType="email-address"
+              leftIcon="mail-outline"
+            />
+            
+            {error ? (
+              <View style={[styles.errorBox, { backgroundColor: colors.error + '15' }]}>
+                <Text style={[styles.errorText, { color: colors.error }]}>{error}</Text>
+              </View>
+            ) : null}
+
+            <Button 
+              title="Send Verification Code" 
+              onPress={onSubmit} 
+              loading={loading} 
+              size="lg"
+              style={{ marginTop: 24 }}
+            />
+          </Card>
+        </View>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 16 },
-  cardPad: { width: '100%', maxWidth: 400, padding: 16 },
-  title: { fontSize: 18, fontWeight: '700', marginBottom: 12 },
-  error: { color: '#ef4444', marginTop: 8 },
-  info: { color: '#065f46', marginTop: 8 },
+  container: { flex: 1 },
+  keyboardView: { flex: 1 },
+  content: { flex: 1, padding: 24, justifyContent: 'center' },
+  backBtn: { position: 'absolute', top: 20, left: 24, zIndex: 10 },
+  header: { marginBottom: 32 },
+  title: { fontSize: 32, fontWeight: '700', marginBottom: 12 },
+  subtitle: { fontSize: 16, lineHeight: 24 },
+  formCard: { padding: 24 },
+  errorBox: { padding: 12, borderRadius: 12, marginTop: 16, alignItems: 'center' },
+  errorText: { fontSize: 14, fontWeight: '500' },
 });

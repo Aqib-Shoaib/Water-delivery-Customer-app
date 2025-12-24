@@ -19,13 +19,14 @@ import Support from './src/screens/Support';
 import { ThemeProvider, useThemeContext } from './src/context/ThemeContext';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as SplashScreen from 'expo-splash-screen';
+import { StripeProvider } from '@stripe/stripe-react-native';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 function ToggleThemeButton() {
   const { mode, toggle } = useThemeContext();
-  const { colors, dark } = useTheme();
+  const { colors } = useTheme();
   return (
     <TouchableOpacity onPress={toggle} style={{ paddingHorizontal: 12 }}>
       <Ionicons name={mode === 'dark' ? 'sunny' : 'moon'} size={22} color={colors.primary} />
@@ -34,10 +35,11 @@ function ToggleThemeButton() {
 }
 
 function AuthedStack() {
+  const { colors } = useTheme();
   return (
     <Stack.Navigator
       screenOptions={{
-        headerTintColor: '#dc2626',
+        headerTintColor: colors.primary,
         headerRight: () => <ToggleThemeButton />,
       }}
     >
@@ -50,13 +52,23 @@ function AuthedStack() {
 }
 
 function MainTabs() {
+  const { colors } = useTheme();
   return (
     <Tab.Navigator
-      screenOptions={{
-        headerTintColor: '#dc2626',
-        tabBarActiveTintColor: '#dc2626',
+      screenOptions={({ route }) => ({
+        headerTintColor: colors.primary,
+        tabBarActiveTintColor: colors.primary,
         headerRight: () => <ToggleThemeButton />,
-      }}
+        tabBarIcon: ({ focused, color, size }) => {
+          let iconName;
+          if (route.name === 'Browse') iconName = focused ? 'home' : 'home-outline';
+          else if (route.name === 'Cart') iconName = focused ? 'cart' : 'cart-outline';
+          else if (route.name === 'Orders') iconName = focused ? 'clipboard' : 'clipboard-outline';
+          else if (route.name === 'Support') iconName = focused ? 'headset' : 'headset-outline';
+          else if (route.name === 'Profile') iconName = focused ? 'person' : 'person-outline';
+          return <Ionicons name={iconName} size={size} color={color} />;
+        },
+      })}
     >
       <Tab.Screen name="Browse" component={Browse} />
       <Tab.Screen name="Cart" component={Cart} />
@@ -68,10 +80,11 @@ function MainTabs() {
 }
 
 function UnauthedStack() {
+  const { colors } = useTheme();
   return (
     <Stack.Navigator
       screenOptions={{
-        headerTintColor: '#dc2626',
+        headerTintColor: colors.primary,
         headerRight: () => <ToggleThemeButton />,
       }}
     >
@@ -85,16 +98,19 @@ function UnauthedStack() {
 
 function RootNavigator() {
   const { isAuthed, loading } = useAuth();
+  const { colors } = useTheme();
+  
   useEffect(() => {
     if (!loading) {
       SplashScreen.hideAsync().catch(() => {});
     }
   }, [loading]);
+  
   if (loading) {
     return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#ffffff' }}>
-        <ActivityIndicator size="large" color="#dc2626" />
-        <Text style={{ marginTop: 12, color: '#6b7280' }}>Loading...</Text>
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background }}>
+        <ActivityIndicator size="large" color={colors.primary} />
+        <Text style={{ marginTop: 12, color: colors.textSecondary }}>Loading...</Text>
       </View>
     );
   }
@@ -113,14 +129,22 @@ export default function App() {
   useEffect(() => {
     SplashScreen.preventAutoHideAsync().catch(() => {});
   }, []);
+  
+  const STRIPE_KEY = process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY || '';
+
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <CartProvider>
-          <ThemedContainer />
-        </CartProvider>
-      </AuthProvider>
-    </ThemeProvider>
+    <StripeProvider 
+      publishableKey={STRIPE_KEY}
+      merchantIdentifier="merchant.com.waterdelivery" // optional, for Apple Pay
+    >
+      <ThemeProvider>
+        <AuthProvider>
+          <CartProvider>
+            <ThemedContainer />
+          </CartProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </StripeProvider>
   );
 }
 

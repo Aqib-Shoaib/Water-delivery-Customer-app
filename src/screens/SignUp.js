@@ -13,16 +13,17 @@ export default function SignUp({ navigation }) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [cnic, setCnic] = useState('');
   const [error, setError] = useState('');
 
   const handleRegister = async () => {
-    if(!name || !email || !password) {
+    if(!name || !email || !password || !cnic) {
       setError("Please fill in all fields");
       return;
     }
     setError('');
     try {
-      await register({ name, email, password });
+      await register({ name, email, password, cnic });
     } catch (e) {
       setError(e.message);
     }
@@ -72,6 +73,16 @@ export default function SignUp({ navigation }) {
               leftIcon="lock-closed-outline"
             />
 
+            <Input
+              label="CNIC"
+              placeholder="12345-1234567-1"
+              value={cnic}
+              onChangeText={setCnic}
+              keyboardType="numeric"
+              style={{ marginTop: 16 }}
+              leftIcon="card-outline"
+            />
+
             {error ? (
               <View style={[styles.errorBox, { backgroundColor: colors.error + '15' }]}>
                 <Text style={[styles.errorText, { color: colors.error }]}>{error}</Text>
@@ -82,6 +93,7 @@ export default function SignUp({ navigation }) {
               title="Sign Up" 
               onPress={handleRegister} 
               loading={loading} 
+              disabled={loading}
               size="lg"
               style={{ marginTop: 24 }}
             />

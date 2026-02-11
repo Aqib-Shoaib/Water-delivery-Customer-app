@@ -12,6 +12,8 @@ export default function SignUp({ navigation }) {
   
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [cnic, setCnic] = useState('');
   const [error, setError] = useState('');
@@ -23,7 +25,7 @@ export default function SignUp({ navigation }) {
     }
     setError('');
     try {
-      await register({ name, email, password, cnic });
+      await register({ name, email, password, cnic, username, phone });
     } catch (e) {
       setError(e.message);
     }
@@ -71,6 +73,26 @@ export default function SignUp({ navigation }) {
               secureTextEntry
               style={{ marginTop: 16 }}
               leftIcon="lock-closed-outline"
+            />
+
+            <Input
+              label="Username"
+              placeholder="johndoe123"
+              value={username}
+              onChangeText={setUsername}
+              autoCapitalize="none"
+              style={{ marginTop: 16 }}
+              leftIcon="person-outline"
+            />
+
+            <Input
+              label="Mobile Number"
+              placeholder="03001234567"
+              value={phone}
+              onChangeText={setPhone}
+              keyboardType="phone-pad"
+              style={{ marginTop: 16 }}
+              leftIcon="call-outline"
             />
 
             <Input

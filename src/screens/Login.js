@@ -23,7 +23,7 @@ export default function Login({ navigation }) {
     }
     setError('');
     try {
-      await login({ email, password });
+      await login({ identifier: email, password });
     } catch (e) {
       setError(e.message);
     }
@@ -37,9 +37,12 @@ export default function Login({ navigation }) {
       >
         <View style={styles.content}>
           <View style={styles.header}>
-            <View style={[styles.logoContainer, { backgroundColor: colors.primary + '20' }]}>
-              <Text style={[styles.logoText, { color: colors.primary }]}>WD</Text>
+            <View style={[styles.logoContainer]}>
+              <Image source={require('../../assets/logo-liflon.png')} style={styles.logo} />
             </View>
+            <Text style={[styles.subtitle, { color: colors.textSecondary, fontSize: 12 }]}>
+              Liflon - A Product of KSHEALTHPLUS
+            </Text>
             <Text style={[styles.title, { color: colors.text }]}>Welcome Back</Text>
             <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
               Sign in to manage your water deliveries
@@ -48,13 +51,13 @@ export default function Login({ navigation }) {
 
           <Card variant="glass" style={styles.formCard}>
             <Input
-              label="Email Address"
-              placeholder="john@example.com"
+              label="Email, Username or Mobile"
+              placeholder="Enter email, username or mobile"
               value={email}
               onChangeText={setEmail}
               autoCapitalize="none"
-              keyboardType="email-address"
-              leftIcon="mail-outline"
+              keyboardType="default"
+              leftIcon="person-outline"
             />
             
             <Input
@@ -112,20 +115,21 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    padding: 24,
-    justifyContent: 'center',
+    padding: 12,
   },
   header: {
     alignItems: 'center',
-    marginBottom: 40,
   },
   logoContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 120,
+    height: 120,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 24,
+  },
+  logo: {
+    width: 120,
+    height: 120,
+    borderRadius: 40,
   },
   logoText: {
     fontSize: 32,
@@ -141,7 +145,8 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   formCard: {
-    padding: 24,
+    padding: 12,
+    marginTop: 10,
   },
   forgotPass: {
     alignSelf: 'flex-end',

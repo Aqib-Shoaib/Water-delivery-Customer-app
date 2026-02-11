@@ -65,12 +65,12 @@ export function AuthProvider({ children }) {
     })();
   }, []);
 
-  const login = async ({ email, password }) => {
+  const login = async ({ email, identifier, password }) => {
     const url = `${API_BASE}/api/auth/login`;
     const res = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ identifier: identifier || email, password }),
     });
     if (!res.ok) throw new Error('Invalid credentials');
     const data = await res.json();
@@ -81,13 +81,13 @@ export function AuthProvider({ children }) {
   };
 
   // Register a new customer account
-  const register = async ({ name, email, password, cnic }) => {
+  const register = async ({ name, email, password, cnic, username, phone }) => {
     // Real backend registration
     const url = `${API_BASE}/api/auth/register`;
     const res = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, password, cnic }),
+      body: JSON.stringify({ name, email, password, cnic, username, phone }),
     });
     let json;
     try {
